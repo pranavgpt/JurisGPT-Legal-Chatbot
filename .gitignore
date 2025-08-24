@@ -1,0 +1,20 @@
+# Environment variables
+.env
+
+# Python specific
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OS generated files
+.DS_Store
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Editor-specific configurations
+.vscode/
+.idea/
+my_vector_store/
+temp-repo/
