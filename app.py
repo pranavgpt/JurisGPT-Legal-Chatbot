@@ -2,6 +2,8 @@ import streamlit as st
 import os
 import time
 import json
+from langchain.document_loaders import PyPDFLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain.prompts import PromptTemplate
@@ -12,7 +14,7 @@ from dotenv import load_dotenv
 
 # Set up environment variables
 load_dotenv()
-os.environ['GOOGLE_API_KEY'] = os.getenv("GOOGLE_API_KEY")
+google_api_key = os.getenv("GOOGLE_API_KEY")
 groq_api_key = os.getenv("GROQ_API_KEY")
 
 # Streamlit UI setup
@@ -77,9 +79,36 @@ if "messages" not in st.session_state:
 if "memory" not in st.session_state:
     st.session_state.memory = ConversationBufferWindowMemory(k=2, memory_key="chat_history", return_messages=True)
 
-# Initialize embeddings and vector store
-embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
-db = FAISS.load_local("my_vector_store", embeddings, allow_dangerous_deserialization=True)
+@st.cache_resource
+def load_vector_db():
+    docs = []
+    folder_path = "LEGAL-DATA"
+
+    # Load PDFs
+    for file in os.listdir(folder_path):
+        if file.endswith(".pdf"):
+            loader = PyPDFLoader(os.path.join(folder_path, file))
+            docs.extend(loader.load())
+
+    # Split documents
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=1000,
+        chunk_overlap=200
+    )
+    documents = text_splitter.split_documents(docs)
+
+    # Create embeddings
+    embeddings = GoogleGenerativeAIEmbeddings(
+        model="models/embedding-001",
+        google_api_key=os.getenv("GOOGLE_API_KEY")
+    )
+
+    # Create FAISS DB
+    db = FAISS.from_documents(documents, embeddings)
+
+    return db
+
+db = load_vector_db()
 db_retriever = db.as_retriever(search_type="similarity", search_kwargs={"k": 6})
 
 # Enhanced prompt templates for different modes
