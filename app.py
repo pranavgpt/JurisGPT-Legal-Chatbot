@@ -86,14 +86,15 @@ def load_vector_db():
 
     # Load PDFs
     for file in os.listdir(folder_path):
-        if file.endswith(".pdf"):
-            loader = PyPDFLoader(os.path.join(folder_path, file))
-            docs.extend(loader.load())
+    if file.endswith(".pdf"):
+        loader = PyPDFLoader(os.path.join(folder_path, file))
+        docs.extend(loader.load())
+        break
 
     # Split documents
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=1000,
-        chunk_overlap=200
+        chunk_size=800,
+        chunk_overlap=100
     )
     documents = text_splitter.split_documents(docs)
 
