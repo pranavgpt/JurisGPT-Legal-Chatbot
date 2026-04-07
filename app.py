@@ -85,7 +85,7 @@ def load_vector_db():
     folder_path = "LEGAL-DATA"
 
     # Load PDFs
-    for file in os.listdir(folder_path):
+for file in os.listdir(folder_path):
     if file.endswith(".pdf"):
         loader = PyPDFLoader(os.path.join(folder_path, file))
         docs.extend(loader.load())
