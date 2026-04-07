@@ -8,7 +8,3 @@ streamlit
 langchain_community
 python-dotenv
 pypdf
-dataclasses
-typing
-re
-json
